@@ -134,7 +134,7 @@ export default function RefreshJobsPage() {
         </div>
       </div>
 
-      <div className="overflow-x-auto rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)]">
+      <div className="overflow-x-auto rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface)] shadow-sm">
         <table className="w-full min-w-[880px] text-left text-sm">
           <thead className="border-b border-[var(--color-border)] text-xs text-[var(--color-text-muted)]">
             <tr>
@@ -156,7 +156,7 @@ export default function RefreshJobsPage() {
               </tr>
             )}
             {data?.data.map((job) => (
-              <tr key={job.id}>
+              <tr key={job.id} className="hover:bg-[var(--color-bg)] transition-colors">
                 <td className="px-4 py-3 font-medium text-[var(--color-text)]">{job.name}</td>
                 <td className="px-4 py-3 text-[var(--color-text-muted)]">{job.sourceName}</td>
                 <td className="px-4 py-3 font-mono text-xs text-[var(--color-text-muted)]">{job.cronSchedule}</td>

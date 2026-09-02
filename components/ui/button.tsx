@@ -10,10 +10,10 @@ interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
 }
 
 const variantClasses: Record<Variant, string> = {
-  primary: "bg-[var(--color-primary)] text-white hover:bg-[var(--color-primary-hover)]",
+  primary: "bg-[var(--color-primary)] text-white shadow-sm hover:bg-[var(--color-primary-hover)] hover:shadow-md",
   secondary:
     "bg-[var(--color-surface)] text-[var(--color-text)] border border-[var(--color-border)] hover:bg-[var(--color-bg)]",
-  danger: "bg-[var(--color-danger)] text-white hover:opacity-90",
+  danger: "bg-[var(--color-danger)] text-white shadow-sm hover:opacity-90 hover:shadow-md",
   ghost: "bg-transparent text-[var(--color-text)] hover:bg-[var(--color-bg)]",
 };
 
@@ -23,7 +23,7 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
       <button
         ref={ref}
         disabled={disabled || loading}
-        className={`inline-flex items-center justify-center gap-2 rounded-md px-4 py-2 text-sm font-medium transition-colors disabled:opacity-60 disabled:cursor-not-allowed ${variantClasses[variant]} ${className}`}
+        className={`inline-flex items-center justify-center gap-2 rounded-lg px-4 py-2 text-sm font-medium transition-all disabled:opacity-60 disabled:cursor-not-allowed disabled:shadow-none ${variantClasses[variant]} ${className}`}
         {...props}
       >
         {loading && (

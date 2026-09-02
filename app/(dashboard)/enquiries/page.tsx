@@ -105,7 +105,7 @@ export default function EnquiriesPage() {
         </div>
       </div>
 
-      <div className="overflow-x-auto rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)]">
+      <div className="overflow-x-auto rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface)] shadow-sm">
         <table className="w-full min-w-[800px] text-left text-sm">
           <thead className="border-b border-[var(--color-border)] text-xs text-[var(--color-text-muted)]">
             <tr>
@@ -126,7 +126,7 @@ export default function EnquiriesPage() {
               </tr>
             )}
             {data?.data.map((e) => (
-              <tr key={e.id}>
+              <tr key={e.id} className="hover:bg-[var(--color-bg)] transition-colors">
                 <td className="px-4 py-3">
                   <p className="font-medium text-[var(--color-text)]">{e.name}</p>
                   <p className="text-xs text-[var(--color-text-muted)]">{e.email}</p>

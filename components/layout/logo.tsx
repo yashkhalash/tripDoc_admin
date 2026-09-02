@@ -3,7 +3,13 @@
 import { useEffect, useState } from "react";
 import { Branding, DEFAULT_PLATFORM_NAME, loadBranding } from "@/lib/branding";
 
-export function Logo({ withLabel = true }: { withLabel?: boolean }) {
+export function Logo({
+  withLabel = true,
+  variant = "default",
+}: {
+  withLabel?: boolean;
+  variant?: "default" | "sidebar";
+}) {
   const [branding, setBranding] = useState<Branding>({
     platformName: DEFAULT_PLATFORM_NAME,
     logoDataUrl: null,
@@ -40,7 +46,17 @@ export function Logo({ withLabel = true }: { withLabel?: boolean }) {
           <circle cx="20" cy="14" r="1.3" fill="var(--color-primary)" />
         </svg>
       )}
-      {withLabel && <span className="text-lg font-bold text-[var(--color-primary)]">{branding.platformName}</span>}
+      {withLabel &&
+        (variant === "sidebar" ? (
+          <div className="min-w-0 leading-tight">
+            <p className="truncate text-base font-bold text-[var(--sidebar-text)]">{branding.platformName}</p>
+            <p className="text-[10px] font-semibold tracking-widest text-[var(--sidebar-text-muted)]">
+              ADMIN PANEL
+            </p>
+          </div>
+        ) : (
+          <span className="text-lg font-bold text-[var(--color-primary)]">{branding.platformName}</span>
+        ))}
     </div>
   );
 }

@@ -127,7 +127,7 @@ export default function NotificationTemplatesPage() {
         </div>
       </div>
 
-      <div className="overflow-x-auto rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)]">
+      <div className="overflow-x-auto rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface)] shadow-sm">
         <table className="w-full min-w-[720px] text-left text-sm">
           <thead className="border-b border-[var(--color-border)] text-xs text-[var(--color-text-muted)]">
             <tr>
@@ -147,7 +147,7 @@ export default function NotificationTemplatesPage() {
               </tr>
             )}
             {data?.data.map((t) => (
-              <tr key={t.id}>
+              <tr key={t.id} className="hover:bg-[var(--color-bg)] transition-colors">
                 <td className="px-4 py-3 font-medium text-[var(--color-text)]">{t.name}</td>
                 <td className="px-4 py-3 text-[var(--color-text-muted)]">{t.channel}</td>
                 <td className="px-4 py-3">

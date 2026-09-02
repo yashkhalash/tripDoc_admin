@@ -114,7 +114,7 @@ export default function FeedbackReportsPage() {
         </div>
       </div>
 
-      <div className="overflow-x-auto rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)]">
+      <div className="overflow-x-auto rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface)] shadow-sm">
         <table className="w-full min-w-[800px] text-left text-sm">
           <thead className="border-b border-[var(--color-border)] text-xs text-[var(--color-text-muted)]">
             <tr>
@@ -135,7 +135,7 @@ export default function FeedbackReportsPage() {
               </tr>
             )}
             {data?.data.map((r) => (
-              <tr key={r.id}>
+              <tr key={r.id} className="hover:bg-[var(--color-bg)] transition-colors">
                 <td className="px-4 py-3 font-medium text-[var(--color-text)]">{r.subject}</td>
                 <td className="px-4 py-3 text-[var(--color-text-muted)]">{r.user.name}</td>
                 <td className="px-4 py-3">

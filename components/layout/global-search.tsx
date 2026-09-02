@@ -56,7 +56,7 @@ export function GlobalSearch() {
 
   return (
     <div className="relative hidden max-w-sm flex-1 md:block" ref={containerRef}>
-      <div className="flex items-center gap-2 rounded-md border border-[var(--color-border)] bg-[var(--color-bg)] px-3 py-2">
+      <div className="flex items-center gap-2 rounded-full border border-[var(--color-border)] bg-[var(--color-bg)] px-4 py-2 transition-colors focus-within:border-[var(--color-primary)]">
         <Search size={16} className="shrink-0 text-[var(--color-text-muted)]" />
         <input
           type="search"

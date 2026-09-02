@@ -125,7 +125,7 @@ export default function UsersPage() {
         </div>
       </div>
 
-      <div className="overflow-x-auto rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)]">
+      <div className="overflow-x-auto rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface)] shadow-sm">
         <table className="w-full min-w-[720px] text-left text-sm">
           <thead className="border-b border-[var(--color-border)] text-xs text-[var(--color-text-muted)]">
             <tr>
@@ -147,7 +147,7 @@ export default function UsersPage() {
               </tr>
             )}
             {data?.data.map((user) => (
-              <tr key={user.id}>
+              <tr key={user.id} className="hover:bg-[var(--color-bg)] transition-colors">
                 <td className="px-4 py-3">
                   <Link href={`/users/${user.id}`} className="font-medium text-[var(--color-primary)] hover:underline">
                     {user.name}

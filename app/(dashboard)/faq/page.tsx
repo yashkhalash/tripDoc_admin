@@ -98,7 +98,7 @@ export default function FaqPage() {
         />
       </div>
 
-      <div className="overflow-x-auto rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)]">
+      <div className="overflow-x-auto rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface)] shadow-sm">
         <table className="w-full min-w-[720px] text-left text-sm">
           <thead className="border-b border-[var(--color-border)] text-xs text-[var(--color-text-muted)]">
             <tr>
@@ -118,7 +118,7 @@ export default function FaqPage() {
               </tr>
             )}
             {data?.data.map((f) => (
-              <tr key={f.id}>
+              <tr key={f.id} className="hover:bg-[var(--color-bg)] transition-colors">
                 <td className="px-4 py-3 font-medium text-[var(--color-text)]">{f.question}</td>
                 <td className="px-4 py-3 text-[var(--color-text-muted)]">{f.category ?? "—"}</td>
                 <td className="px-4 py-3">

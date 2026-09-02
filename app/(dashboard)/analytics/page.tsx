@@ -57,7 +57,7 @@ export default function AnalyticsPage() {
 
 function BreakdownCard({ title, rows }: { title: string; rows: { status: string; count: number }[] }) {
   return (
-    <div className="rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)] p-5 shadow-sm">
+    <div className="rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface)] p-5 shadow-sm">
       <h2 className="text-sm font-semibold text-[var(--color-text)]">{title}</h2>
       <div className="mt-3 flex flex-col divide-y divide-[var(--color-border)]">
         {rows.length === 0 && <p className="py-2 text-sm text-[var(--color-text-muted)]">No data yet.</p>}

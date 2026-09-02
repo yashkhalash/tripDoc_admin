@@ -112,7 +112,7 @@ export default function ContentOverridesPage() {
         />
       </div>
 
-      <div className="overflow-x-auto rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)]">
+      <div className="overflow-x-auto rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface)] shadow-sm">
         <table className="w-full min-w-[800px] text-left text-sm">
           <thead className="border-b border-[var(--color-border)] text-xs text-[var(--color-text-muted)]">
             <tr>
@@ -133,7 +133,7 @@ export default function ContentOverridesPage() {
               </tr>
             )}
             {data?.data.map((override) => (
-              <tr key={override.id}>
+              <tr key={override.id} className="hover:bg-[var(--color-bg)] transition-colors">
                 <td className="px-4 py-3">
                   <p className="font-medium text-[var(--color-text)]">{override.snapshot.trip.destination}</p>
                   <p className="text-xs text-[var(--color-text-muted)]">{override.snapshot.trip.title}</p>

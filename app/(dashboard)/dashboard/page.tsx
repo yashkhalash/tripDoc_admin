@@ -24,9 +24,28 @@ import {
   BarChart,
   Bar,
 } from "recharts";
+import Link from "next/link";
+import { Settings, type LucideIcon } from "lucide-react";
 import { dashboardApi } from "@/lib/dashboard-api";
 import { analyticsApi } from "@/lib/analytics-api";
 import { StatCard } from "@/components/ui/stat-card";
+
+function QuickAction({ href, icon: Icon, title, description }: { href: string; icon: LucideIcon; title: string; description: string }) {
+  return (
+    <Link
+      href={href}
+      className="flex items-center gap-4 rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface)] p-5 shadow-sm transition-all hover:-translate-y-0.5 hover:shadow-md"
+    >
+      <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-[var(--color-primary)] text-white">
+        <Icon size={20} />
+      </span>
+      <div>
+        <p className="text-sm font-semibold text-[var(--color-text)]">{title}</p>
+        <p className="text-xs text-[var(--color-text-muted)]">{description}</p>
+      </div>
+    </Link>
+  );
+}
 
 function formatDate(iso: string) {
   return new Date(iso).toLocaleDateString(undefined, {
@@ -78,19 +97,28 @@ export default function DashboardPage() {
         <div className="text-sm text-[var(--color-text-muted)]">Loading metrics…</div>
       ) : (
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
-          <StatCard href="/users" icon={Users} label="Total Users" value={summary.users.total} hint={`${summary.users.active} active`} />
-          <StatCard icon={Map} label="Total Trips" value={summary.trips.total} hint={`${summary.trips.upcoming} upcoming`} />
-          <StatCard href="/reports" icon={MessageSquareWarning} label="Open Feedback" value={summary.feedback.open} />
-          <StatCard href="/referrals" icon={Gift} label="Referrals" value={summary.referrals.total} hint={`${summary.referrals.converted} converted`} />
-          <StatCard href="/enquiries" icon={Mail} label="New Enquiries" value={summary.enquiries.new} />
-          <StatCard href="/refresh-jobs" icon={RefreshCw} label="Active Refresh Jobs" value={summary.refreshJobs.active} hint={`${summary.refreshJobs.failed} failed`} />
-          <StatCard href="/users" icon={Users} label="Suspended Users" value={summary.users.suspended} />
-          <StatCard href="/cms" icon={Map} label="Published CMS Pages" value={summary.cms.published} />
+          <StatCard href="/users" icon={Users} label="Total Users" value={summary.users.total} hint={`${summary.users.active} active`} tone="blue" />
+          <StatCard icon={Map} label="Total Trips" value={summary.trips.total} hint={`${summary.trips.upcoming} upcoming`} tone="teal" />
+          <StatCard href="/reports" icon={MessageSquareWarning} label="Open Feedback" value={summary.feedback.open} tone="orange" />
+          <StatCard href="/referrals" icon={Gift} label="Referrals" value={summary.referrals.total} hint={`${summary.referrals.converted} converted`} tone="purple" />
+          <StatCard href="/enquiries" icon={Mail} label="New Enquiries" value={summary.enquiries.new} tone="pink" />
+          <StatCard href="/refresh-jobs" icon={RefreshCw} label="Active Refresh Jobs" value={summary.refreshJobs.active} hint={`${summary.refreshJobs.failed} failed`} tone="green" />
+          <StatCard href="/users" icon={Users} label="Suspended Users" value={summary.users.suspended} tone="red" />
+          <StatCard href="/cms" icon={Map} label="Published CMS Pages" value={summary.cms.published} tone="primary" />
         </div>
       )}
 
+      <div>
+        <h2 className="mb-3 text-sm font-semibold text-[var(--color-text)]">Quick Actions</h2>
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          <QuickAction href="/users" icon={Users} title="Manage Users" description="View and manage all users" />
+          <QuickAction href="/cms" icon={Map} title="CMS Pages" description="Edit static content pages" />
+          <QuickAction href="/settings/general" icon={Settings} title="Settings" description="Update platform branding" />
+        </div>
+      </div>
+
       <div className="grid grid-cols-1 gap-4 lg:grid-cols-3">
-        <div className="rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)] p-5 shadow-sm lg:col-span-2">
+        <div className="rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface)] p-5 shadow-sm lg:col-span-2">
           <h2 className="text-sm font-semibold text-[var(--color-text)]">User Base Breakdown</h2>
           <div className="mt-4 h-64">
             <ResponsiveContainer width="100%" height="100%">
@@ -118,7 +146,7 @@ export default function DashboardPage() {
           </div>
         </div>
 
-        <div className="rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)] p-5 shadow-sm">
+        <div className="rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface)] p-5 shadow-sm">
           <h2 className="text-sm font-semibold text-[var(--color-text)]">Enquiries by Status</h2>
           <div className="mt-4 h-64">
             {enquiryPieData.length === 0 ? (
@@ -147,7 +175,7 @@ export default function DashboardPage() {
         </div>
       </div>
 
-      <div className="rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)] p-5 shadow-sm">
+      <div className="rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface)] p-5 shadow-sm">
         <h2 className="text-sm font-semibold text-[var(--color-text)]">Top Destinations</h2>
         <div className="mt-4 h-64">
           {destinationBarData.length === 0 ? (
@@ -229,7 +257,7 @@ function ActivityCard({
   items?: { id: string; primary: string; secondary: string; date: string }[];
 }) {
   return (
-    <div className="rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)] p-5 shadow-sm">
+    <div className="rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface)] p-5 shadow-sm">
       <h2 className="text-sm font-semibold text-[var(--color-text)]">{title}</h2>
       <div className="mt-3 flex flex-col divide-y divide-[var(--color-border)]">
         {loading && <p className="py-2 text-sm text-[var(--color-text-muted)]">Loading…</p>}

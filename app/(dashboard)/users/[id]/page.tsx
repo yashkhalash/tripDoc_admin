@@ -32,7 +32,7 @@ export default function UserDetailPage({ params }: { params: Promise<{ id: strin
 
       {user && (
         <>
-          <div className="rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)] p-6 shadow-sm">
+          <div className="rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface)] p-6 shadow-sm">
             <div className="flex items-start justify-between">
               <div>
                 <h1 className="text-xl font-semibold text-[var(--color-text)]">{user.name}</h1>
@@ -62,7 +62,7 @@ export default function UserDetailPage({ params }: { params: Promise<{ id: strin
           </div>
 
           <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
-            <div className="rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)] p-5 shadow-sm">
+            <div className="rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface)] p-5 shadow-sm">
               <h2 className="text-sm font-semibold text-[var(--color-text)]">Recent Trips</h2>
               <div className="mt-3 flex flex-col divide-y divide-[var(--color-border)]">
                 {user.recentTrips.length === 0 && (
@@ -80,7 +80,7 @@ export default function UserDetailPage({ params }: { params: Promise<{ id: strin
               </div>
             </div>
 
-            <div className="rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)] p-5 shadow-sm">
+            <div className="rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface)] p-5 shadow-sm">
               <h2 className="text-sm font-semibold text-[var(--color-text)]">Saved Destinations</h2>
               <div className="mt-3 flex flex-col divide-y divide-[var(--color-border)]">
                 {user.recentSavedDestinations.length === 0 && (

@@ -120,7 +120,7 @@ function ReferralsTab() {
         </div>
       </div>
 
-      <div className="overflow-x-auto rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)]">
+      <div className="overflow-x-auto rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface)] shadow-sm">
         <table className="w-full min-w-[880px] text-left text-sm">
           <thead className="border-b border-[var(--color-border)] text-xs text-[var(--color-text-muted)]">
             <tr>
@@ -143,7 +143,7 @@ function ReferralsTab() {
               </tr>
             )}
             {data?.data.map((r) => (
-              <tr key={r.id}>
+              <tr key={r.id} className="hover:bg-[var(--color-bg)] transition-colors">
                 <td className="px-4 py-3 font-mono text-xs">{r.code}</td>
                 <td className="px-4 py-3 text-[var(--color-text-muted)]">{r.sender.name}</td>
                 <td className="px-4 py-3 text-[var(--color-text-muted)]">{r.receiver?.name ?? "—"}</td>
@@ -251,7 +251,7 @@ function InfluencerUpgradesTab() {
         </Select>
       </div>
 
-      <div className="overflow-x-auto rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)]">
+      <div className="overflow-x-auto rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface)] shadow-sm">
         <table className="w-full min-w-[720px] text-left text-sm">
           <thead className="border-b border-[var(--color-border)] text-xs text-[var(--color-text-muted)]">
             <tr>
@@ -272,7 +272,7 @@ function InfluencerUpgradesTab() {
               </tr>
             )}
             {data?.data.map((u) => (
-              <tr key={u.id}>
+              <tr key={u.id} className="hover:bg-[var(--color-bg)] transition-colors">
                 <td className="px-4 py-3">
                   <p className="font-medium text-[var(--color-text)]">{u.user.name}</p>
                   <p className="text-xs text-[var(--color-text-muted)]">{u.user.email}</p>

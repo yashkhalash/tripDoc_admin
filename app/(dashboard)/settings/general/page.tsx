@@ -74,7 +74,7 @@ export default function GeneralSettingsPage() {
         </p>
       </div>
 
-      <div className="max-w-lg rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)] p-6 shadow-sm">
+      <div className="max-w-lg rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface)] p-6 shadow-sm">
         <p className="text-sm font-semibold text-[var(--color-text)]">Logo preview</p>
         <div className="mt-3 rounded-lg border border-[var(--color-border)] bg-[var(--color-bg)] p-4">
           {logoDataUrl ? (

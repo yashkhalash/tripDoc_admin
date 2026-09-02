@@ -49,7 +49,7 @@ export default function ApiConfigurationPage() {
         </p>
       </div>
 
-      <div className="max-w-md rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)] p-6 shadow-sm">
+      <div className="max-w-md rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface)] p-6 shadow-sm">
         {isLoading ? (
           <p className="text-sm text-[var(--color-text-muted)]">Loading current configuration…</p>
         ) : (

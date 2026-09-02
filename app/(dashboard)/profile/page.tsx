@@ -75,7 +75,7 @@ export default function ProfilePage() {
         <p className="text-sm text-[var(--color-text-muted)]">Loading profile…</p>
       ) : (
         <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
-          <div className="rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)] p-6 shadow-sm">
+          <div className="rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface)] p-6 shadow-sm">
             <h2 className="text-sm font-semibold text-[var(--color-text)]">Account Details</h2>
             <form
               onSubmit={(e) => {
@@ -116,7 +116,7 @@ export default function ProfilePage() {
             </form>
           </div>
 
-          <div className="rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)] p-6 shadow-sm">
+          <div className="rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface)] p-6 shadow-sm">
             <h2 className="text-sm font-semibold text-[var(--color-text)]">Change Password</h2>
             <form onSubmit={handlePasswordSubmit} className="mt-4 flex flex-col gap-4">
               <PasswordInput

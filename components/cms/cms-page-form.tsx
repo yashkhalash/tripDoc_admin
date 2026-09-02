@@ -4,6 +4,7 @@ import { useState } from "react";
 import { Input } from "@/components/ui/input";
 import { Select } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
+import { RichTextEditor } from "@/components/ui/rich-text-editor";
 import { CmsPageFormInput, CmsPageStatus } from "@/lib/cms-api";
 
 const empty: CmsPageFormInput = { title: "", slug: "", content: "", status: "DRAFT" };
@@ -46,12 +47,10 @@ export function CmsPageForm({
       />
       <div className="flex flex-col gap-1.5">
         <label className="text-sm font-medium text-[var(--color-text)]">Content</label>
-        <textarea
+        <RichTextEditor
           value={values.content}
-          onChange={(e) => setValues((v) => ({ ...v, content: e.target.value }))}
-          required
-          rows={6}
-          className="rounded-md border border-[var(--color-border)] bg-[var(--color-surface)] px-3 py-2 text-sm text-[var(--color-text)]"
+          onChange={(html) => setValues((v) => ({ ...v, content: html }))}
+          placeholder="Write the page content…"
         />
       </div>
       <Select

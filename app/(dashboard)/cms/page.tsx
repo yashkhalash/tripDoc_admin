@@ -117,7 +117,7 @@ export default function CmsPagesPage() {
         </div>
       </div>
 
-      <div className="overflow-x-auto rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)]">
+      <div className="overflow-x-auto rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface)] shadow-sm">
         <table className="w-full min-w-[720px] text-left text-sm">
           <thead className="border-b border-[var(--color-border)] text-xs text-[var(--color-text-muted)]">
             <tr>
@@ -137,7 +137,7 @@ export default function CmsPagesPage() {
               </tr>
             )}
             {data?.data.map((p) => (
-              <tr key={p.id}>
+              <tr key={p.id} className="hover:bg-[var(--color-bg)] transition-colors">
                 <td className="px-4 py-3 font-medium text-[var(--color-text)]">{p.title}</td>
                 <td className="px-4 py-3 font-mono text-xs text-[var(--color-text-muted)]">{p.slug}</td>
                 <td className="px-4 py-3">
@@ -205,7 +205,10 @@ export default function CmsPagesPage() {
             </div>
             <div>
               <p className="text-xs text-[var(--color-text-muted)]">Content</p>
-              <p className="whitespace-pre-wrap text-[var(--color-text-muted)]">{viewing.content}</p>
+              <div
+                className="prose prose-sm max-w-none"
+                dangerouslySetInnerHTML={{ __html: viewing.content }}
+              />
             </div>
             <div className="flex justify-end">
               <Button variant="secondary" onClick={() => setViewing(null)}>
