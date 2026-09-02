@@ -2,11 +2,14 @@
 
 import { useEffect, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { UserCircle } from "lucide-react";
 import { profileApi } from "@/lib/profile-api";
 import { Input } from "@/components/ui/input";
+import { PasswordInput } from "@/components/ui/password-input";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/components/ui/toast";
 import { getApiErrorMessage } from "@/lib/api-client";
+import { fileToDataUrl } from "@/lib/file-to-data-url";
 
 export default function ProfilePage() {
   const { showToast } = useToast();
@@ -81,14 +84,30 @@ export default function ProfilePage() {
               }}
               className="mt-4 flex flex-col gap-4"
             >
+              <div className="flex items-center gap-4">
+                {avatarUrl ? (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img src={avatarUrl} alt={name} className="h-16 w-16 rounded-full object-cover" />
+                ) : (
+                  <UserCircle size={64} className="text-[var(--color-text-muted)]" />
+                )}
+                <div className="flex flex-col gap-1.5">
+                  <label className="text-sm font-medium text-[var(--color-text)]">Avatar</label>
+                  <input
+                    type="file"
+                    accept="image/*"
+                    onChange={async (e) => {
+                      const file = e.target.files?.[0];
+                      if (!file) return;
+                      const dataUrl = await fileToDataUrl(file);
+                      setAvatarUrl(dataUrl);
+                    }}
+                    className="text-xs text-[var(--color-text-muted)] file:mr-3 file:rounded-md file:border-0 file:bg-[var(--color-primary)] file:px-3 file:py-1.5 file:text-xs file:font-medium file:text-white hover:file:bg-[var(--color-primary-hover)]"
+                  />
+                </div>
+              </div>
               <Input label="Name" value={name} onChange={(e) => setName(e.target.value)} required />
               <Input label="Email" value={profile?.email ?? ""} disabled />
-              <Input
-                label="Avatar URL"
-                value={avatarUrl}
-                onChange={(e) => setAvatarUrl(e.target.value)}
-                placeholder="https://…"
-              />
               <div className="flex justify-end">
                 <Button type="submit" loading={updateMutation.isPending}>
                   Save Changes
@@ -100,23 +119,20 @@ export default function ProfilePage() {
           <div className="rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)] p-6 shadow-sm">
             <h2 className="text-sm font-semibold text-[var(--color-text)]">Change Password</h2>
             <form onSubmit={handlePasswordSubmit} className="mt-4 flex flex-col gap-4">
-              <Input
+              <PasswordInput
                 label="Current password"
-                type="password"
                 value={currentPassword}
                 onChange={(e) => setCurrentPassword(e.target.value)}
                 required
               />
-              <Input
+              <PasswordInput
                 label="New password"
-                type="password"
                 value={newPassword}
                 onChange={(e) => setNewPassword(e.target.value)}
                 required
               />
-              <Input
+              <PasswordInput
                 label="Confirm new password"
-                type="password"
                 value={confirmPassword}
                 onChange={(e) => setConfirmPassword(e.target.value)}
                 required

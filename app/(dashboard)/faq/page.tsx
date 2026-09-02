@@ -12,6 +12,9 @@ import { ConfirmModal } from "@/components/ui/confirm-modal";
 import { FaqForm } from "@/components/faq/faq-form";
 import { useToast } from "@/components/ui/toast";
 import { getApiErrorMessage } from "@/lib/api-client";
+import { TableSkeleton } from "@/components/ui/table-skeleton";
+import { ExportCsvButton } from "@/components/ui/export-csv-button";
+import { CsvColumn } from "@/lib/csv-export";
 
 export default function FaqPage() {
   const { showToast } = useToast();
@@ -19,14 +22,15 @@ export default function FaqPage() {
 
   const [search, setSearch] = useState("");
   const [page, setPage] = useState(1);
+  const [pageSize, setPageSize] = useState(10);
 
   const [createOpen, setCreateOpen] = useState(false);
   const [editing, setEditing] = useState<Faq | null>(null);
   const [pendingDelete, setPendingDelete] = useState<Faq | null>(null);
 
   const { data, isLoading } = useQuery({
-    queryKey: ["faqs", { search, page }],
-    queryFn: () => faqApi.list({ page, limit: 10, search: search || undefined }),
+    queryKey: ["faqs", { search, page, pageSize }],
+    queryFn: () => faqApi.list({ page, limit: pageSize, search: search || undefined }),
   });
 
   const invalidate = () => queryClient.invalidateQueries({ queryKey: ["faqs"] });
@@ -61,6 +65,14 @@ export default function FaqPage() {
     onError: (err) => showToast(getApiErrorMessage(err), "error"),
   });
 
+  const csvColumns: CsvColumn<Faq>[] = [
+    { header: "Question", accessor: (f) => f.question },
+    { header: "Answer", accessor: (f) => f.answer },
+    { header: "Category", accessor: (f) => f.category ?? "" },
+    { header: "Sort Order", accessor: (f) => f.sortOrder },
+    { header: "Active", accessor: (f) => (f.isActive ? "Yes" : "No") },
+  ];
+
   return (
     <div className="flex flex-col gap-4">
       <div className="flex items-start justify-between gap-4">
@@ -68,7 +80,10 @@ export default function FaqPage() {
           <h1 className="text-xl font-semibold text-[var(--color-text)]">FAQ Management</h1>
           <p className="text-sm text-[var(--color-text-muted)]">Manage frequently asked questions shown in the app.</p>
         </div>
-        <Button onClick={() => setCreateOpen(true)}>Add FAQ</Button>
+        <div className="flex gap-2">
+          <ExportCsvButton moduleName="FAQ Management" columns={csvColumns} rows={data?.data} />
+          <Button onClick={() => setCreateOpen(true)}>Add FAQ</Button>
+        </div>
       </div>
 
       <div className="max-w-sm">
@@ -94,13 +109,7 @@ export default function FaqPage() {
             </tr>
           </thead>
           <tbody className="divide-y divide-[var(--color-border)]">
-            {isLoading && (
-              <tr>
-                <td colSpan={4} className="px-4 py-6 text-center text-[var(--color-text-muted)]">
-                  Loading FAQs…
-                </td>
-              </tr>
-            )}
+            {isLoading && <TableSkeleton columns={4} />}
             {!isLoading && data?.data.length === 0 && (
               <tr>
                 <td colSpan={4} className="px-4 py-6 text-center text-[var(--color-text-muted)]">
@@ -130,7 +139,17 @@ export default function FaqPage() {
           </tbody>
         </table>
         {data && (
-          <Pagination page={data.pagination.page} totalPages={data.pagination.totalPages} total={data.pagination.total} onPageChange={setPage} />
+          <Pagination
+            page={data.pagination.page}
+            totalPages={data.pagination.totalPages}
+            total={data.pagination.total}
+            onPageChange={setPage}
+            pageSize={pageSize}
+            onPageSizeChange={(size) => {
+              setPageSize(size);
+              setPage(1);
+            }}
+          />
         )}
       </div>
 

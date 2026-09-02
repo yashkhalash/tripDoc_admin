@@ -12,6 +12,9 @@ import { Modal } from "@/components/ui/modal";
 import { ConfirmModal } from "@/components/ui/confirm-modal";
 import { useToast } from "@/components/ui/toast";
 import { getApiErrorMessage } from "@/lib/api-client";
+import { TableSkeleton } from "@/components/ui/table-skeleton";
+import { ExportCsvButton } from "@/components/ui/export-csv-button";
+import { CsvColumn } from "@/lib/csv-export";
 
 function formatDateTime(iso: string) {
   return new Date(iso).toLocaleString(undefined, { month: "short", day: "numeric", hour: "2-digit", minute: "2-digit" });
@@ -24,13 +27,14 @@ export default function EnquiriesPage() {
   const [search, setSearch] = useState("");
   const [status, setStatus] = useState<EnquiryStatus | "">("");
   const [page, setPage] = useState(1);
+  const [pageSize, setPageSize] = useState(10);
 
   const [viewing, setViewing] = useState<ContactEnquiry | null>(null);
   const [pendingDelete, setPendingDelete] = useState<ContactEnquiry | null>(null);
 
   const { data, isLoading } = useQuery({
-    queryKey: ["enquiries", { search, status, page }],
-    queryFn: () => enquiriesApi.list({ page, limit: 10, search: search || undefined, status: status || undefined }),
+    queryKey: ["enquiries", { search, status, page, pageSize }],
+    queryFn: () => enquiriesApi.list({ page, limit: pageSize, search: search || undefined, status: status || undefined }),
   });
 
   const updateMutation = useMutation({
@@ -53,11 +57,23 @@ export default function EnquiriesPage() {
     onError: (err) => showToast(getApiErrorMessage(err), "error"),
   });
 
+  const csvColumns: CsvColumn<ContactEnquiry>[] = [
+    { header: "Name", accessor: (e) => e.name },
+    { header: "Email", accessor: (e) => e.email },
+    { header: "Subject", accessor: (e) => e.subject },
+    { header: "Message", accessor: (e) => e.message },
+    { header: "Status", accessor: (e) => e.status },
+    { header: "Received", accessor: (e) => formatDateTime(e.createdAt) },
+  ];
+
   return (
     <div className="flex flex-col gap-4">
-      <div>
-        <h1 className="text-xl font-semibold text-[var(--color-text)]">Contact Enquiries Management</h1>
-        <p className="text-sm text-[var(--color-text-muted)]">Respond to and track inbound contact form submissions.</p>
+      <div className="flex items-start justify-between gap-4">
+        <div>
+          <h1 className="text-xl font-semibold text-[var(--color-text)]">Contact Enquiries Management</h1>
+          <p className="text-sm text-[var(--color-text-muted)]">Respond to and track inbound contact form submissions.</p>
+        </div>
+        <ExportCsvButton moduleName="Contact Enquiries" columns={csvColumns} rows={data?.data} />
       </div>
 
       <div className="flex flex-col gap-3 sm:flex-row sm:items-end">
@@ -101,13 +117,7 @@ export default function EnquiriesPage() {
             </tr>
           </thead>
           <tbody className="divide-y divide-[var(--color-border)]">
-            {isLoading && (
-              <tr>
-                <td colSpan={5} className="px-4 py-6 text-center text-[var(--color-text-muted)]">
-                  Loading enquiries…
-                </td>
-              </tr>
-            )}
+            {isLoading && <TableSkeleton columns={5} />}
             {!isLoading && data?.data.length === 0 && (
               <tr>
                 <td colSpan={5} className="px-4 py-6 text-center text-[var(--color-text-muted)]">
@@ -141,7 +151,17 @@ export default function EnquiriesPage() {
           </tbody>
         </table>
         {data && (
-          <Pagination page={data.pagination.page} totalPages={data.pagination.totalPages} total={data.pagination.total} onPageChange={setPage} />
+          <Pagination
+            page={data.pagination.page}
+            totalPages={data.pagination.totalPages}
+            total={data.pagination.total}
+            onPageChange={setPage}
+            pageSize={pageSize}
+            onPageSizeChange={(size) => {
+              setPageSize(size);
+              setPage(1);
+            }}
+          />
         )}
       </div>
 

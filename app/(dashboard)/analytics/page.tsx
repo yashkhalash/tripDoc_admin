@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { analyticsApi } from "@/lib/analytics-api";
-import { Input } from "@/components/ui/input";
+import { DatePicker } from "@/components/ui/date-picker";
 import { StatCard } from "@/components/ui/stat-card";
 
 export default function AnalyticsPage() {
@@ -25,8 +25,8 @@ export default function AnalyticsPage() {
       </div>
 
       <div className="flex flex-col gap-3 sm:flex-row">
-        <Input label="From date" type="date" value={dateFrom} onChange={(e) => setDateFrom(e.target.value)} />
-        <Input label="To date" type="date" value={dateTo} onChange={(e) => setDateTo(e.target.value)} />
+        <DatePicker label="From date" value={dateFrom} onChange={setDateFrom} />
+        <DatePicker label="To date" value={dateTo} onChange={setDateTo} />
       </div>
 
       {isLoading || !data ? (

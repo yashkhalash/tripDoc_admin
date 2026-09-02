@@ -5,6 +5,8 @@ import { useRouter } from "next/navigation";
 import { Sidebar } from "@/components/layout/sidebar";
 import { MobileDrawer } from "@/components/layout/mobile-drawer";
 import { Topbar } from "@/components/layout/topbar";
+import { Breadcrumbs } from "@/components/layout/breadcrumbs";
+import { PageLoader } from "@/components/ui/page-loader";
 import { tokenStore } from "@/lib/api-client";
 
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
@@ -20,15 +22,18 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
     setChecked(true);
   }, [router]);
 
-  if (!checked) return null;
+  if (!checked) return <PageLoader />;
 
   return (
-    <div className="flex min-h-screen bg-[var(--color-bg)]">
+    <div className="min-h-screen bg-[var(--color-bg)]">
       <Sidebar />
       <MobileDrawer open={drawerOpen} onClose={() => setDrawerOpen(false)} />
-      <div className="flex min-h-screen flex-1 flex-col">
+      <div className="flex min-h-screen flex-col md:pl-64">
         <Topbar onMenuClick={() => setDrawerOpen(true)} />
-        <main className="flex-1 p-4 md:p-6">{children}</main>
+        <main className="flex-1 p-4 md:p-6">
+          <Breadcrumbs />
+          {children}
+        </main>
       </div>
     </div>
   );

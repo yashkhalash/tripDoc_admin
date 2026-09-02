@@ -13,6 +13,9 @@ import { ConfirmModal } from "@/components/ui/confirm-modal";
 import { CmsPageForm } from "@/components/cms/cms-page-form";
 import { useToast } from "@/components/ui/toast";
 import { getApiErrorMessage } from "@/lib/api-client";
+import { TableSkeleton } from "@/components/ui/table-skeleton";
+import { ExportCsvButton } from "@/components/ui/export-csv-button";
+import { CsvColumn } from "@/lib/csv-export";
 
 export default function CmsPagesPage() {
   const { showToast } = useToast();
@@ -21,6 +24,7 @@ export default function CmsPagesPage() {
   const [search, setSearch] = useState("");
   const [status, setStatus] = useState<CmsPageStatus | "">("");
   const [page, setPage] = useState(1);
+  const [pageSize, setPageSize] = useState(10);
 
   const [createOpen, setCreateOpen] = useState(false);
   const [editing, setEditing] = useState<CmsPage | null>(null);
@@ -28,8 +32,8 @@ export default function CmsPagesPage() {
   const [pendingDelete, setPendingDelete] = useState<CmsPage | null>(null);
 
   const { data, isLoading } = useQuery({
-    queryKey: ["cms-pages", { search, status, page }],
-    queryFn: () => cmsApi.list({ page, limit: 10, search: search || undefined, status: status || undefined }),
+    queryKey: ["cms-pages", { search, status, page, pageSize }],
+    queryFn: () => cmsApi.list({ page, limit: pageSize, search: search || undefined, status: status || undefined }),
   });
 
   const invalidate = () => queryClient.invalidateQueries({ queryKey: ["cms-pages"] });
@@ -64,6 +68,13 @@ export default function CmsPagesPage() {
     onError: (err) => showToast(getApiErrorMessage(err), "error"),
   });
 
+  const csvColumns: CsvColumn<CmsPage>[] = [
+    { header: "Title", accessor: (p) => p.title },
+    { header: "Slug", accessor: (p) => p.slug },
+    { header: "Status", accessor: (p) => p.status },
+    { header: "Content", accessor: (p) => p.content },
+  ];
+
   return (
     <div className="flex flex-col gap-4">
       <div className="flex items-start justify-between gap-4">
@@ -71,7 +82,10 @@ export default function CmsPagesPage() {
           <h1 className="text-xl font-semibold text-[var(--color-text)]">CMS Management</h1>
           <p className="text-sm text-[var(--color-text-muted)]">Manage static content pages shown in the app.</p>
         </div>
-        <Button onClick={() => setCreateOpen(true)}>Add Page</Button>
+        <div className="flex gap-2">
+          <ExportCsvButton moduleName="CMS Management" columns={csvColumns} rows={data?.data} />
+          <Button onClick={() => setCreateOpen(true)}>Add Page</Button>
+        </div>
       </div>
 
       <div className="flex flex-col gap-3 sm:flex-row sm:items-end">
@@ -114,13 +128,7 @@ export default function CmsPagesPage() {
             </tr>
           </thead>
           <tbody className="divide-y divide-[var(--color-border)]">
-            {isLoading && (
-              <tr>
-                <td colSpan={4} className="px-4 py-6 text-center text-[var(--color-text-muted)]">
-                  Loading pages…
-                </td>
-              </tr>
-            )}
+            {isLoading && <TableSkeleton columns={4} />}
             {!isLoading && data?.data.length === 0 && (
               <tr>
                 <td colSpan={4} className="px-4 py-6 text-center text-[var(--color-text-muted)]">
@@ -153,7 +161,17 @@ export default function CmsPagesPage() {
           </tbody>
         </table>
         {data && (
-          <Pagination page={data.pagination.page} totalPages={data.pagination.totalPages} total={data.pagination.total} onPageChange={setPage} />
+          <Pagination
+            page={data.pagination.page}
+            totalPages={data.pagination.totalPages}
+            total={data.pagination.total}
+            onPageChange={setPage}
+            pageSize={pageSize}
+            onPageSizeChange={(size) => {
+              setPageSize(size);
+              setPage(1);
+            }}
+          />
         )}
       </div>
 

@@ -13,6 +13,9 @@ import { ConfirmModal } from "@/components/ui/confirm-modal";
 import { RefreshJobForm } from "@/components/refresh-jobs/refresh-job-form";
 import { useToast } from "@/components/ui/toast";
 import { getApiErrorMessage } from "@/lib/api-client";
+import { TableSkeleton } from "@/components/ui/table-skeleton";
+import { ExportCsvButton } from "@/components/ui/export-csv-button";
+import { CsvColumn } from "@/lib/csv-export";
 
 function formatDateTime(iso: string | null) {
   if (!iso) return "—";
@@ -26,14 +29,15 @@ export default function RefreshJobsPage() {
   const [search, setSearch] = useState("");
   const [status, setStatus] = useState<RefreshJobStatus | "">("");
   const [page, setPage] = useState(1);
+  const [pageSize, setPageSize] = useState(10);
 
   const [createOpen, setCreateOpen] = useState(false);
   const [editing, setEditing] = useState<RefreshJob | null>(null);
   const [pendingDelete, setPendingDelete] = useState<RefreshJob | null>(null);
 
   const { data, isLoading } = useQuery({
-    queryKey: ["refresh-jobs", { search, status, page }],
-    queryFn: () => refreshJobsApi.list({ page, limit: 10, search: search || undefined, status: status || undefined }),
+    queryKey: ["refresh-jobs", { search, status, page, pageSize }],
+    queryFn: () => refreshJobsApi.list({ page, limit: pageSize, search: search || undefined, status: status || undefined }),
   });
 
   const invalidate = () => queryClient.invalidateQueries({ queryKey: ["refresh-jobs"] });
@@ -77,6 +81,15 @@ export default function RefreshJobsPage() {
     onError: (err) => showToast(getApiErrorMessage(err), "error"),
   });
 
+  const csvColumns: CsvColumn<RefreshJob>[] = [
+    { header: "Job", accessor: (j) => j.name },
+    { header: "Source", accessor: (j) => j.sourceName },
+    { header: "Schedule", accessor: (j) => j.cronSchedule },
+    { header: "Status", accessor: (j) => j.status },
+    { header: "Last Run", accessor: (j) => formatDateTime(j.lastRunAt) },
+    { header: "Last Run Status", accessor: (j) => j.lastRunStatus ?? "" },
+  ];
+
   return (
     <div className="flex flex-col gap-4">
       <div className="flex items-start justify-between gap-4">
@@ -86,7 +99,10 @@ export default function RefreshJobsPage() {
             Configure automated refresh schedules for intelligence data sources.
           </p>
         </div>
-        <Button onClick={() => setCreateOpen(true)}>Add Job</Button>
+        <div className="flex gap-2">
+          <ExportCsvButton moduleName="Refresh Jobs" columns={csvColumns} rows={data?.data} />
+          <Button onClick={() => setCreateOpen(true)}>Add Job</Button>
+        </div>
       </div>
 
       <div className="flex flex-col gap-3 sm:flex-row sm:items-end">
@@ -131,13 +147,7 @@ export default function RefreshJobsPage() {
             </tr>
           </thead>
           <tbody className="divide-y divide-[var(--color-border)]">
-            {isLoading && (
-              <tr>
-                <td colSpan={6} className="px-4 py-6 text-center text-[var(--color-text-muted)]">
-                  Loading jobs…
-                </td>
-              </tr>
-            )}
+            {isLoading && <TableSkeleton columns={6} />}
             {!isLoading && data?.data.length === 0 && (
               <tr>
                 <td colSpan={6} className="px-4 py-6 text-center text-[var(--color-text-muted)]">
@@ -172,7 +182,17 @@ export default function RefreshJobsPage() {
           </tbody>
         </table>
         {data && (
-          <Pagination page={data.pagination.page} totalPages={data.pagination.totalPages} total={data.pagination.total} onPageChange={setPage} />
+          <Pagination
+            page={data.pagination.page}
+            totalPages={data.pagination.totalPages}
+            total={data.pagination.total}
+            onPageChange={setPage}
+            pageSize={pageSize}
+            onPageSizeChange={(size) => {
+              setPageSize(size);
+              setPage(1);
+            }}
+          />
         )}
       </div>
 

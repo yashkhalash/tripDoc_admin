@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { referralApi, ReferralStatus } from "@/lib/referral-api";
+import { referralApi, ReferralStatus, Referral, InfluencerUpgrade } from "@/lib/referral-api";
 import { Input } from "@/components/ui/input";
 import { Select } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
@@ -10,6 +10,9 @@ import { Button } from "@/components/ui/button";
 import { Pagination } from "@/components/ui/pagination";
 import { useToast } from "@/components/ui/toast";
 import { getApiErrorMessage } from "@/lib/api-client";
+import { TableSkeleton } from "@/components/ui/table-skeleton";
+import { ExportCsvButton } from "@/components/ui/export-csv-button";
+import { CsvColumn } from "@/lib/csv-export";
 
 function formatDate(iso: string) {
   return new Date(iso).toLocaleDateString(undefined, { month: "short", day: "numeric", year: "numeric" });
@@ -56,11 +59,12 @@ function ReferralsTab() {
   const [search, setSearch] = useState("");
   const [status, setStatus] = useState<ReferralStatus | "">("");
   const [page, setPage] = useState(1);
+  const [pageSize, setPageSize] = useState(10);
 
   const { data, isLoading } = useQuery({
-    queryKey: ["referrals", { search, status, page }],
+    queryKey: ["referrals", { search, status, page, pageSize }],
     queryFn: () =>
-      referralApi.listReferrals({ page, limit: 10, search: search || undefined, status: status || undefined }),
+      referralApi.listReferrals({ page, limit: pageSize, search: search || undefined, status: status || undefined }),
   });
 
   const updateMutation = useMutation({
@@ -72,8 +76,21 @@ function ReferralsTab() {
     onError: (err) => showToast(getApiErrorMessage(err), "error"),
   });
 
+  const csvColumns: CsvColumn<Referral>[] = [
+    { header: "Code", accessor: (r) => r.code },
+    { header: "Sender", accessor: (r) => r.sender.name },
+    { header: "Sender Email", accessor: (r) => r.sender.email },
+    { header: "Receiver", accessor: (r) => r.receiver?.name ?? "" },
+    { header: "Reward", accessor: (r) => r.rewardAmount },
+    { header: "Status", accessor: (r) => r.status },
+    { header: "Created", accessor: (r) => formatDate(r.createdAt) },
+  ];
+
   return (
     <div className="flex flex-col gap-4">
+      <div className="flex justify-end">
+        <ExportCsvButton moduleName="Referrals" columns={csvColumns} rows={data?.data} />
+      </div>
       <div className="flex flex-col gap-3 sm:flex-row sm:items-end">
         <div className="flex-1">
           <Input
@@ -117,13 +134,7 @@ function ReferralsTab() {
             </tr>
           </thead>
           <tbody className="divide-y divide-[var(--color-border)]">
-            {isLoading && (
-              <tr>
-                <td colSpan={7} className="px-4 py-6 text-center text-[var(--color-text-muted)]">
-                  Loading referrals…
-                </td>
-              </tr>
-            )}
+            {isLoading && <TableSkeleton columns={7} />}
             {!isLoading && data?.data.length === 0 && (
               <tr>
                 <td colSpan={7} className="px-4 py-6 text-center text-[var(--color-text-muted)]">
@@ -168,7 +179,17 @@ function ReferralsTab() {
           </tbody>
         </table>
         {data && (
-          <Pagination page={data.pagination.page} totalPages={data.pagination.totalPages} total={data.pagination.total} onPageChange={setPage} />
+          <Pagination
+            page={data.pagination.page}
+            totalPages={data.pagination.totalPages}
+            total={data.pagination.total}
+            onPageChange={setPage}
+            pageSize={pageSize}
+            onPageSizeChange={(size) => {
+              setPageSize(size);
+              setPage(1);
+            }}
+          />
         )}
       </div>
     </div>
@@ -179,14 +200,15 @@ function InfluencerUpgradesTab() {
   const { showToast } = useToast();
   const queryClient = useQueryClient();
   const [page, setPage] = useState(1);
+  const [pageSize, setPageSize] = useState(10);
   const [approvedFilter, setApprovedFilter] = useState<"" | "true" | "false">("");
 
   const { data, isLoading } = useQuery({
-    queryKey: ["influencer-upgrades", { page, approvedFilter }],
+    queryKey: ["influencer-upgrades", { page, pageSize, approvedFilter }],
     queryFn: () =>
       referralApi.listInfluencerUpgrades({
         page,
-        limit: 10,
+        limit: pageSize,
         approved: approvedFilter === "" ? undefined : approvedFilter === "true",
       }),
   });
@@ -201,8 +223,19 @@ function InfluencerUpgradesTab() {
     onError: (err) => showToast(getApiErrorMessage(err), "error"),
   });
 
+  const csvColumns: CsvColumn<InfluencerUpgrade>[] = [
+    { header: "User", accessor: (u) => u.user.name },
+    { header: "Email", accessor: (u) => u.user.email },
+    { header: "Tier", accessor: (u) => u.tier },
+    { header: "Approved", accessor: (u) => (u.approved ? "Yes" : "No") },
+    { header: "Requested", accessor: (u) => formatDate(u.createdAt) },
+  ];
+
   return (
     <div className="flex flex-col gap-4">
+      <div className="flex justify-end">
+        <ExportCsvButton moduleName="Influencer Upgrades" columns={csvColumns} rows={data?.data} />
+      </div>
       <div className="w-full sm:w-48">
         <Select
           label="Approval status"
@@ -230,13 +263,7 @@ function InfluencerUpgradesTab() {
             </tr>
           </thead>
           <tbody className="divide-y divide-[var(--color-border)]">
-            {isLoading && (
-              <tr>
-                <td colSpan={5} className="px-4 py-6 text-center text-[var(--color-text-muted)]">
-                  Loading requests…
-                </td>
-              </tr>
-            )}
+            {isLoading && <TableSkeleton columns={5} />}
             {!isLoading && data?.data.length === 0 && (
               <tr>
                 <td colSpan={5} className="px-4 py-6 text-center text-[var(--color-text-muted)]">
@@ -281,7 +308,17 @@ function InfluencerUpgradesTab() {
           </tbody>
         </table>
         {data && (
-          <Pagination page={data.pagination.page} totalPages={data.pagination.totalPages} total={data.pagination.total} onPageChange={setPage} />
+          <Pagination
+            page={data.pagination.page}
+            totalPages={data.pagination.totalPages}
+            total={data.pagination.total}
+            onPageChange={setPage}
+            pageSize={pageSize}
+            onPageSizeChange={(size) => {
+              setPageSize(size);
+              setPage(1);
+            }}
+          />
         )}
       </div>
     </div>

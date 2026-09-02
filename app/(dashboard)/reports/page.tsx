@@ -12,6 +12,9 @@ import { Modal } from "@/components/ui/modal";
 import { ConfirmModal } from "@/components/ui/confirm-modal";
 import { useToast } from "@/components/ui/toast";
 import { getApiErrorMessage } from "@/lib/api-client";
+import { TableSkeleton } from "@/components/ui/table-skeleton";
+import { ExportCsvButton } from "@/components/ui/export-csv-button";
+import { CsvColumn } from "@/lib/csv-export";
 
 function formatDateTime(iso: string) {
   return new Date(iso).toLocaleString(undefined, { month: "short", day: "numeric", hour: "2-digit", minute: "2-digit" });
@@ -24,15 +27,16 @@ export default function FeedbackReportsPage() {
   const [search, setSearch] = useState("");
   const [status, setStatus] = useState<FeedbackStatus | "">("");
   const [page, setPage] = useState(1);
+  const [pageSize, setPageSize] = useState(10);
 
   const [viewing, setViewing] = useState<FeedbackReport | null>(null);
   const [notesDraft, setNotesDraft] = useState("");
   const [pendingDelete, setPendingDelete] = useState<FeedbackReport | null>(null);
 
   const { data, isLoading } = useQuery({
-    queryKey: ["feedback-reports", { search, status, page }],
+    queryKey: ["feedback-reports", { search, status, page, pageSize }],
     queryFn: () =>
-      feedbackApi.list({ page, limit: 10, search: search || undefined, status: status || undefined }),
+      feedbackApi.list({ page, limit: pageSize, search: search || undefined, status: status || undefined }),
   });
 
   const updateMutation = useMutation({
@@ -60,11 +64,24 @@ export default function FeedbackReportsPage() {
     setNotesDraft(report.adminNotes ?? "");
   }
 
+  const csvColumns: CsvColumn<FeedbackReport>[] = [
+    { header: "Subject", accessor: (r) => r.subject },
+    { header: "Reporter", accessor: (r) => r.user.name },
+    { header: "Email", accessor: (r) => r.user.email },
+    { header: "Message", accessor: (r) => r.message },
+    { header: "Status", accessor: (r) => r.status },
+    { header: "Admin Notes", accessor: (r) => r.adminNotes ?? "" },
+    { header: "Submitted", accessor: (r) => formatDateTime(r.createdAt) },
+  ];
+
   return (
     <div className="flex flex-col gap-4">
-      <div>
-        <h1 className="text-xl font-semibold text-[var(--color-text)]">Feedback &amp; Report Management</h1>
-        <p className="text-sm text-[var(--color-text-muted)]">Review and resolve traveler feedback and reports.</p>
+      <div className="flex items-start justify-between gap-4">
+        <div>
+          <h1 className="text-xl font-semibold text-[var(--color-text)]">Feedback &amp; Report Management</h1>
+          <p className="text-sm text-[var(--color-text-muted)]">Review and resolve traveler feedback and reports.</p>
+        </div>
+        <ExportCsvButton moduleName="Feedback & Reports" columns={csvColumns} rows={data?.data} />
       </div>
 
       <div className="flex flex-col gap-3 sm:flex-row sm:items-end">
@@ -109,13 +126,7 @@ export default function FeedbackReportsPage() {
             </tr>
           </thead>
           <tbody className="divide-y divide-[var(--color-border)]">
-            {isLoading && (
-              <tr>
-                <td colSpan={5} className="px-4 py-6 text-center text-[var(--color-text-muted)]">
-                  Loading reports…
-                </td>
-              </tr>
-            )}
+            {isLoading && <TableSkeleton columns={5} />}
             {!isLoading && data?.data.length === 0 && (
               <tr>
                 <td colSpan={5} className="px-4 py-6 text-center text-[var(--color-text-muted)]">
@@ -146,7 +157,17 @@ export default function FeedbackReportsPage() {
           </tbody>
         </table>
         {data && (
-          <Pagination page={data.pagination.page} totalPages={data.pagination.totalPages} total={data.pagination.total} onPageChange={setPage} />
+          <Pagination
+            page={data.pagination.page}
+            totalPages={data.pagination.totalPages}
+            total={data.pagination.total}
+            onPageChange={setPage}
+            pageSize={pageSize}
+            onPageSizeChange={(size) => {
+              setPageSize(size);
+              setPage(1);
+            }}
+          />
         )}
       </div>
 

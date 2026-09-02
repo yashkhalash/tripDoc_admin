@@ -4,7 +4,7 @@ import { Suspense, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
+import { PasswordInput } from "@/components/ui/password-input";
 import { useToast } from "@/components/ui/toast";
 import { authApi } from "@/lib/auth-api";
 import { getApiErrorMessage } from "@/lib/api-client";
@@ -52,19 +52,17 @@ function ResetPasswordForm() {
           No reset token found in the URL. Use the link from your email.
         </p>
       )}
-      <Input
+      <PasswordInput
         label="New password"
         name="newPassword"
-        type="password"
         placeholder="••••••••"
         value={newPassword}
         onChange={(e) => setNewPassword(e.target.value)}
         required
       />
-      <Input
+      <PasswordInput
         label="Confirm password"
         name="confirmPassword"
-        type="password"
         placeholder="••••••••"
         value={confirmPassword}
         onChange={(e) => setConfirmPassword(e.target.value)}

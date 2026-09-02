@@ -18,6 +18,9 @@ import { ConfirmModal } from "@/components/ui/confirm-modal";
 import { TemplateForm } from "@/components/notification-templates/template-form";
 import { useToast } from "@/components/ui/toast";
 import { getApiErrorMessage } from "@/lib/api-client";
+import { TableSkeleton } from "@/components/ui/table-skeleton";
+import { ExportCsvButton } from "@/components/ui/export-csv-button";
+import { CsvColumn } from "@/lib/csv-export";
 
 export default function NotificationTemplatesPage() {
   const { showToast } = useToast();
@@ -26,6 +29,7 @@ export default function NotificationTemplatesPage() {
   const [search, setSearch] = useState("");
   const [channel, setChannel] = useState<NotificationChannel | "">("");
   const [page, setPage] = useState(1);
+  const [pageSize, setPageSize] = useState(10);
 
   const [createOpen, setCreateOpen] = useState(false);
   const [editing, setEditing] = useState<NotificationTemplate | null>(null);
@@ -33,9 +37,9 @@ export default function NotificationTemplatesPage() {
   const [pendingDelete, setPendingDelete] = useState<NotificationTemplate | null>(null);
 
   const { data, isLoading } = useQuery({
-    queryKey: ["notification-templates", { search, channel, page }],
+    queryKey: ["notification-templates", { search, channel, page, pageSize }],
     queryFn: () =>
-      notificationTemplatesApi.list({ page, limit: 10, search: search || undefined, channel: channel || undefined }),
+      notificationTemplatesApi.list({ page, limit: pageSize, search: search || undefined, channel: channel || undefined }),
   });
 
   const invalidate = () => queryClient.invalidateQueries({ queryKey: ["notification-templates"] });
@@ -71,6 +75,14 @@ export default function NotificationTemplatesPage() {
     onError: (err) => showToast(getApiErrorMessage(err), "error"),
   });
 
+  const csvColumns: CsvColumn<NotificationTemplate>[] = [
+    { header: "Name", accessor: (t) => t.name },
+    { header: "Channel", accessor: (t) => t.channel },
+    { header: "Subject", accessor: (t) => t.subject ?? "" },
+    { header: "Body", accessor: (t) => t.body },
+    { header: "Active", accessor: (t) => (t.isActive ? "Yes" : "No") },
+  ];
+
   return (
     <div className="flex flex-col gap-4">
       <div className="flex items-start justify-between gap-4">
@@ -80,7 +92,10 @@ export default function NotificationTemplatesPage() {
             Manage push, email, and SMS templates sent to travelers.
           </p>
         </div>
-        <Button onClick={() => setCreateOpen(true)}>Add Template</Button>
+        <div className="flex gap-2">
+          <ExportCsvButton moduleName="Notification Templates" columns={csvColumns} rows={data?.data} />
+          <Button onClick={() => setCreateOpen(true)}>Add Template</Button>
+        </div>
       </div>
 
       <div className="flex flex-col gap-3 sm:flex-row sm:items-end">
@@ -123,13 +138,7 @@ export default function NotificationTemplatesPage() {
             </tr>
           </thead>
           <tbody className="divide-y divide-[var(--color-border)]">
-            {isLoading && (
-              <tr>
-                <td colSpan={4} className="px-4 py-6 text-center text-[var(--color-text-muted)]">
-                  Loading templates…
-                </td>
-              </tr>
-            )}
+            {isLoading && <TableSkeleton columns={4} />}
             {!isLoading && data?.data.length === 0 && (
               <tr>
                 <td colSpan={4} className="px-4 py-6 text-center text-[var(--color-text-muted)]">
@@ -162,7 +171,17 @@ export default function NotificationTemplatesPage() {
           </tbody>
         </table>
         {data && (
-          <Pagination page={data.pagination.page} totalPages={data.pagination.totalPages} total={data.pagination.total} onPageChange={setPage} />
+          <Pagination
+            page={data.pagination.page}
+            totalPages={data.pagination.totalPages}
+            total={data.pagination.total}
+            onPageChange={setPage}
+            pageSize={pageSize}
+            onPageSizeChange={(size) => {
+              setPageSize(size);
+              setPage(1);
+            }}
+          />
         )}
       </div>
 

@@ -11,6 +11,9 @@ import { ConfirmModal } from "@/components/ui/confirm-modal";
 import { OverrideForm } from "@/components/content-overrides/override-form";
 import { useToast } from "@/components/ui/toast";
 import { getApiErrorMessage } from "@/lib/api-client";
+import { TableSkeleton } from "@/components/ui/table-skeleton";
+import { ExportCsvButton } from "@/components/ui/export-csv-button";
+import { CsvColumn } from "@/lib/csv-export";
 
 function formatDateTime(iso: string) {
   return new Date(iso).toLocaleString(undefined, {
@@ -27,6 +30,7 @@ export default function ContentOverridesPage() {
 
   const [search, setSearch] = useState("");
   const [page, setPage] = useState(1);
+  const [pageSize, setPageSize] = useState(10);
 
   const [createOpen, setCreateOpen] = useState(false);
   const [editing, setEditing] = useState<ContentOverride | null>(null);
@@ -34,8 +38,8 @@ export default function ContentOverridesPage() {
   const [pendingDelete, setPendingDelete] = useState<ContentOverride | null>(null);
 
   const { data, isLoading } = useQuery({
-    queryKey: ["content-overrides", { search, page }],
-    queryFn: () => contentOverridesApi.list({ page, limit: 10, search: search || undefined }),
+    queryKey: ["content-overrides", { search, page, pageSize }],
+    queryFn: () => contentOverridesApi.list({ page, limit: pageSize, search: search || undefined }),
   });
 
   const createMutation = useMutation({
@@ -72,6 +76,15 @@ export default function ContentOverridesPage() {
     onError: (err) => showToast(getApiErrorMessage(err), "error"),
   });
 
+  const csvColumns: CsvColumn<ContentOverride>[] = [
+    { header: "Trip", accessor: (o) => o.snapshot.trip.title },
+    { header: "Destination", accessor: (o) => o.snapshot.trip.destination },
+    { header: "Category", accessor: (o) => o.snapshot.category.name },
+    { header: "Override Text", accessor: (o) => o.overrideText },
+    { header: "Reason", accessor: (o) => o.reason ?? "" },
+    { header: "Updated", accessor: (o) => formatDateTime(o.updatedAt) },
+  ];
+
   return (
     <div className="flex flex-col gap-4">
       <div className="flex items-start justify-between gap-4">
@@ -81,7 +94,10 @@ export default function ContentOverridesPage() {
             Replace an auto-generated intelligence snapshot with a manually verified version.
           </p>
         </div>
-        <Button onClick={() => setCreateOpen(true)}>Add Override</Button>
+        <div className="flex gap-2">
+          <ExportCsvButton moduleName="Content Overrides" columns={csvColumns} rows={data?.data} />
+          <Button onClick={() => setCreateOpen(true)}>Add Override</Button>
+        </div>
       </div>
 
       <div className="max-w-sm">
@@ -108,13 +124,7 @@ export default function ContentOverridesPage() {
             </tr>
           </thead>
           <tbody className="divide-y divide-[var(--color-border)]">
-            {isLoading && (
-              <tr>
-                <td colSpan={5} className="px-4 py-6 text-center text-[var(--color-text-muted)]">
-                  Loading overrides…
-                </td>
-              </tr>
-            )}
+            {isLoading && <TableSkeleton columns={5} />}
             {!isLoading && data?.data.length === 0 && (
               <tr>
                 <td colSpan={5} className="px-4 py-6 text-center text-[var(--color-text-muted)]">
@@ -157,6 +167,11 @@ export default function ContentOverridesPage() {
             totalPages={data.pagination.totalPages}
             total={data.pagination.total}
             onPageChange={setPage}
+            pageSize={pageSize}
+            onPageSizeChange={(size) => {
+              setPageSize(size);
+              setPage(1);
+            }}
           />
         )}
       </div>

@@ -12,6 +12,9 @@ import { Pagination } from "@/components/ui/pagination";
 import { ConfirmModal } from "@/components/ui/confirm-modal";
 import { useToast } from "@/components/ui/toast";
 import { getApiErrorMessage } from "@/lib/api-client";
+import { TableSkeleton } from "@/components/ui/table-skeleton";
+import { ExportCsvButton } from "@/components/ui/export-csv-button";
+import { CsvColumn } from "@/lib/csv-export";
 
 function formatDate(iso: string) {
   return new Date(iso).toLocaleDateString(undefined, { month: "short", day: "numeric", year: "numeric" });
@@ -24,16 +27,17 @@ export default function UsersPage() {
   const [search, setSearch] = useState("");
   const [status, setStatus] = useState<UserStatus | "">("");
   const [page, setPage] = useState(1);
+  const [pageSize, setPageSize] = useState(10);
   const [pendingAction, setPendingAction] = useState<
     { type: "suspend" | "activate" | "delete"; user: AdminUser } | null
   >(null);
 
   const { data, isLoading } = useQuery({
-    queryKey: ["users", { search, status, page }],
+    queryKey: ["users", { search, status, page, pageSize }],
     queryFn: () =>
       userApi.list({
         page,
-        limit: 10,
+        limit: pageSize,
         search: search || undefined,
         status: status || undefined,
       }),
@@ -71,13 +75,25 @@ export default function UsersPage() {
     }
   }
 
+  const csvColumns: CsvColumn<AdminUser>[] = [
+    { header: "Name", accessor: (u) => u.name },
+    { header: "Email", accessor: (u) => u.email },
+    { header: "Status", accessor: (u) => u.status },
+    { header: "Influencer", accessor: (u) => (u.isInfluencer ? "Yes" : "No") },
+    { header: "Trips", accessor: (u) => u.tripCount ?? 0 },
+    { header: "Joined", accessor: (u) => formatDate(u.createdAt) },
+  ];
+
   return (
     <div className="flex flex-col gap-4">
-      <div>
-        <h1 className="text-xl font-semibold text-[var(--color-text)]">User Management</h1>
-        <p className="text-sm text-[var(--color-text-muted)]">
-          Browse, search, and manage TripDoc member accounts.
-        </p>
+      <div className="flex items-start justify-between gap-4">
+        <div>
+          <h1 className="text-xl font-semibold text-[var(--color-text)]">User Management</h1>
+          <p className="text-sm text-[var(--color-text-muted)]">
+            Browse, search, and manage TripDoc member accounts.
+          </p>
+        </div>
+        <ExportCsvButton moduleName="User Management" columns={csvColumns} rows={data?.data} />
       </div>
 
       <div className="flex flex-col gap-3 sm:flex-row sm:items-end">
@@ -122,13 +138,7 @@ export default function UsersPage() {
             </tr>
           </thead>
           <tbody className="divide-y divide-[var(--color-border)]">
-            {isLoading && (
-              <tr>
-                <td colSpan={6} className="px-4 py-6 text-center text-[var(--color-text-muted)]">
-                  Loading users…
-                </td>
-              </tr>
-            )}
+            {isLoading && <TableSkeleton columns={6} />}
             {!isLoading && data?.data.length === 0 && (
               <tr>
                 <td colSpan={6} className="px-4 py-6 text-center text-[var(--color-text-muted)]">
@@ -184,6 +194,11 @@ export default function UsersPage() {
             totalPages={data.pagination.totalPages}
             total={data.pagination.total}
             onPageChange={setPage}
+            pageSize={pageSize}
+            onPageSizeChange={(size) => {
+              setPageSize(size);
+              setPage(1);
+            }}
           />
         )}
       </div>

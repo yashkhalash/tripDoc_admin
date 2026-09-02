@@ -18,6 +18,9 @@ import { Modal } from "@/components/ui/modal";
 import { SourceHealthForm } from "@/components/source-health/source-health-form";
 import { useToast } from "@/components/ui/toast";
 import { getApiErrorMessage } from "@/lib/api-client";
+import { TableSkeleton } from "@/components/ui/table-skeleton";
+import { ExportCsvButton } from "@/components/ui/export-csv-button";
+import { CsvColumn } from "@/lib/csv-export";
 
 function formatDateTime(iso: string) {
   return new Date(iso).toLocaleString(undefined, {
@@ -35,17 +38,18 @@ export default function SourceHealthPage() {
   const [search, setSearch] = useState("");
   const [status, setStatus] = useState<SourceHealthStatus | "">("");
   const [page, setPage] = useState(1);
+  const [pageSize, setPageSize] = useState(10);
 
   const [formOpen, setFormOpen] = useState(false);
   const [editing, setEditing] = useState<SourceHealth | null>(null);
   const [pendingDelete, setPendingDelete] = useState<SourceHealth | null>(null);
 
   const { data, isLoading } = useQuery({
-    queryKey: ["source-health", { search, status, page }],
+    queryKey: ["source-health", { search, status, page, pageSize }],
     queryFn: () =>
       sourceHealthApi.list({
         page,
-        limit: 10,
+        limit: pageSize,
         search: search || undefined,
         status: status || undefined,
       }),
@@ -82,6 +86,15 @@ export default function SourceHealthPage() {
     onError: (err) => showToast(getApiErrorMessage(err), "error"),
   });
 
+  const csvColumns: CsvColumn<SourceHealth>[] = [
+    { header: "Source", accessor: (s) => s.sourceName },
+    { header: "Category", accessor: (s) => s.category },
+    { header: "Status", accessor: (s) => s.status },
+    { header: "Response Time (ms)", accessor: (s) => s.responseTimeMs ?? "" },
+    { header: "Last Checked", accessor: (s) => formatDateTime(s.lastCheckedAt) },
+    { header: "Message", accessor: (s) => s.message ?? "" },
+  ];
+
   return (
     <div className="flex flex-col gap-4">
       <div className="flex items-start justify-between gap-4">
@@ -91,7 +104,10 @@ export default function SourceHealthPage() {
             Track the health of external data sources powering trip intelligence.
           </p>
         </div>
-        <Button onClick={() => setFormOpen(true)}>Add Source</Button>
+        <div className="flex gap-2">
+          <ExportCsvButton moduleName="Source Health" columns={csvColumns} rows={data?.data} />
+          <Button onClick={() => setFormOpen(true)}>Add Source</Button>
+        </div>
       </div>
 
       <div className="flex flex-col gap-3 sm:flex-row sm:items-end">
@@ -136,13 +152,7 @@ export default function SourceHealthPage() {
             </tr>
           </thead>
           <tbody className="divide-y divide-[var(--color-border)]">
-            {isLoading && (
-              <tr>
-                <td colSpan={6} className="px-4 py-6 text-center text-[var(--color-text-muted)]">
-                  Loading sources…
-                </td>
-              </tr>
-            )}
+            {isLoading && <TableSkeleton columns={6} />}
             {!isLoading && data?.data.length === 0 && (
               <tr>
                 <td colSpan={6} className="px-4 py-6 text-center text-[var(--color-text-muted)]">
@@ -188,6 +198,11 @@ export default function SourceHealthPage() {
             totalPages={data.pagination.totalPages}
             total={data.pagination.total}
             onPageChange={setPage}
+            pageSize={pageSize}
+            onPageSizeChange={(size) => {
+              setPageSize(size);
+              setPage(1);
+            }}
           />
         )}
       </div>

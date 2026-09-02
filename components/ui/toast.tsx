@@ -8,6 +8,7 @@ interface ToastItem {
   id: number;
   message: string;
   variant: ToastVariant;
+  leaving: boolean;
 }
 
 interface ToastContextValue {
@@ -16,25 +17,34 @@ interface ToastContextValue {
 
 const ToastContext = createContext<ToastContextValue | undefined>(undefined);
 
+const DISPLAY_MS = 4000;
+const EXIT_MS = 200;
+
 export function ToastProvider({ children }: { children: React.ReactNode }) {
   const [toasts, setToasts] = useState<ToastItem[]>([]);
 
   const showToast = useCallback((message: string, variant: ToastVariant = "info") => {
     const id = Date.now() + Math.random();
-    setToasts((prev) => [...prev, { id, message, variant }]);
+    setToasts((prev) => [...prev, { id, message, variant, leaving: false }]);
+
     setTimeout(() => {
-      setToasts((prev) => prev.filter((t) => t.id !== id));
-    }, 4000);
+      setToasts((prev) => prev.map((t) => (t.id === id ? { ...t, leaving: true } : t)));
+      setTimeout(() => {
+        setToasts((prev) => prev.filter((t) => t.id !== id));
+      }, EXIT_MS);
+    }, DISPLAY_MS);
   }, []);
 
   return (
     <ToastContext.Provider value={{ showToast }}>
       {children}
-      <div className="fixed bottom-4 right-4 z-50 flex flex-col gap-2">
+      <div className="pointer-events-none fixed left-1/2 top-4 z-50 flex -translate-x-1/2 flex-col items-center gap-2">
         {toasts.map((t) => (
           <div
             key={t.id}
-            className={`rounded-md px-4 py-3 text-sm shadow-lg text-white min-w-[240px] ${
+            className={`pointer-events-auto min-w-[240px] rounded-md px-4 py-3 text-sm text-white shadow-lg ${
+              t.leaving ? "toast-exit" : "toast-enter"
+            } ${
               t.variant === "success"
                 ? "bg-[var(--color-success)]"
                 : t.variant === "error"

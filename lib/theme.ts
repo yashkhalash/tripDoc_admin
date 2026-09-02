@@ -24,6 +24,7 @@ export function loadThemeOverrides(): ThemeOverrides {
 
 export function saveThemeOverrides(overrides: ThemeOverrides) {
   window.localStorage.setItem(STORAGE_KEY, JSON.stringify(overrides));
+  window.dispatchEvent(new Event("tripdoc_admin_branding_changed"));
 }
 
 export function applyThemeOverrides(overrides: ThemeOverrides) {

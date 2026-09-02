@@ -5,6 +5,8 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { PasswordInput } from "@/components/ui/password-input";
+import { OtpInput } from "@/components/ui/otp-input";
 import { useToast } from "@/components/ui/toast";
 import { authApi } from "@/lib/auth-api";
 import { getApiErrorMessage } from "@/lib/api-client";
@@ -63,17 +65,9 @@ export default function LoginPage() {
             We sent a one-time code to your registered email.
           </p>
         </div>
-        <Input
-          label="OTP Code"
-          name="otp"
-          inputMode="numeric"
-          maxLength={6}
-          placeholder="123456"
-          value={otp}
-          onChange={(e) => setOtp(e.target.value)}
-          required
-        />
-        <Button type="submit" loading={loading} className="w-full">
+        <OtpInput length={4} value={otp} onChange={setOtp} />
+        <p className="-mt-2 text-xs text-[var(--color-text-muted)]">Test OTP: 1111</p>
+        <Button type="submit" loading={loading} className="w-full" disabled={otp.length < 4}>
           Verify &amp; Sign in
         </Button>
         <button
@@ -102,10 +96,9 @@ export default function LoginPage() {
         onChange={(e) => setEmail(e.target.value)}
         required
       />
-      <Input
+      <PasswordInput
         label="Password"
         name="password"
-        type="password"
         placeholder="••••••••"
         value={password}
         onChange={(e) => setPassword(e.target.value)}
