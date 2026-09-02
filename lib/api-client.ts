@@ -33,6 +33,9 @@ export const tokenStore = {
 
 export const apiClient = axios.create({
   baseURL: `${API_BASE_URL}${API_PREFIX}`,
+  headers: {
+    "ngrok-skip-browser-warning": "true",
+  },
 });
 
 apiClient.interceptors.request.use((config) => {
