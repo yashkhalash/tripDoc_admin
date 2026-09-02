@@ -10,7 +10,7 @@ export const NAV_ITEMS: NavItem[] = [
   { label: "Content Overrides", href: "/content-overrides" },
   { label: "Refresh Jobs", href: "/refresh-jobs" },
   { label: "Referrals", href: "/referrals" },
-  { label: "Reports", href: "/reports" },
+  { label: "Feedback & Reports", href: "/reports" },
   { label: "Analytics", href: "/analytics" },
   { label: "Notification Templates", href: "/notification-templates" },
   { label: "CMS", href: "/cms" },
